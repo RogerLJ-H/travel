@@ -1,11 +1,11 @@
-
 {
-  "name": "我的漸進式應用程式",
+  "name": "我的應用程式",
   "short_name": "我的App",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4CAF50",
+  "background_color": "#f3f4f6",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
