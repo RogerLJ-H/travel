@@ -1,1 +1,32 @@
-<p>Hello </p>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的 PWA App</title>
+  
+  <!-- 1. 引入 Manifest 檔 -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4CAF50">
+  
+  <!-- iOS 蘋果手機專用設定 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="我的 App">
+  <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+  <h1>Hello PWA!</h1>
+
+  <!-- 2. 註冊 Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker 註冊成功！', reg))
+          .catch(err => console.log('Service Worker 註冊失敗：', err));
+      });
+    }
+  </script>
+</body>
+</html>
