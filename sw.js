@@ -1,5 +1,5 @@
-const CACHE_NAME = 'pwa-cache-v2';
-const urlsToCache = [
+const CACHE_NAME = 'pwa-app-v3';
+const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
@@ -7,18 +7,36 @@ const urlsToCache = [
   './icon-512.png'
 ];
 
-// 安裝並快取檔案
+// 安裝 Service Worker 並寫入快取
 self.addEventListener('install', event => {
+  self.skipWaiting(); // 強制新 SW 立即接管
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
   );
 });
 
-// 攔截請求並優先回傳快取
+// 清除舊快取
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// 讀取請求（優先從快取抓取）
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
+    caches.match(event.request).then(cachedResponse => {
+      return cachedResponse || fetch(event.request);
+    })
   );
 });
