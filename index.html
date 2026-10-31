@@ -2,179 +2,730 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>東京旅遊導覽</title>
-  
+
   <!-- PWA 設定 -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ff5252">
-  
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E6%9D%B1%E4%BA%AC%E6%97%85%E9%81%8A%E5%B0%8E%E8%A6%BD%22%2C%22short_name%22%3A%22%E6%9D%B1%E4%BA%AC%E5%B0%8E%E8%A6%BD%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F7F5F0%22%2C%22theme_color%22%3A%22%232B2B2B%22%7D">
+  <meta name="theme-color" content="#2B2B2B">
+
   <!-- iOS 專用設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="東京導覽">
 
+  <!-- Google Fonts: 日系人文手寫與明體字型 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Yomogi&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
   <style>
+    :root {
+      --bg-washi: #F7F5F0;
+      --card-bg: #FFFFFF;
+      --charcoal: #2B2B2B;
+      --sub-gray: #6E6862;
+      --line-color: #E2DDD5;
+      --line-dark: #3E3A36;
+      --accent-cinnabar: #B84A39; /* 日系朱紅細節 */
+      --accent-matcha: #5E6953;
+      --font-hand: 'Yomogi', 'Zen Kaku Gothic New', cursive, -apple-system, sans-serif;
+      --font-serif: 'Shippori Mincho', 'Songti TC', serif;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body, html {
       width: 100%;
       height: 100%;
       overflow: hidden;
+      background-color: var(--bg-washi);
+      color: var(--charcoal);
+      font-family: var(--font-hand);
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* 頁面容器：滿版背景 */
+    /* 細微棉麻紙質雜誌紋理 */
+    .washi-pattern {
+      background-color: var(--bg-washi);
+      background-image: radial-gradient(var(--line-color) 0.75px, transparent 0.75px);
+      background-size: 16px 16px;
+    }
+
+    /* ================= 1. 初始歡迎畫面 (Welcome Screen) ================= */
     .welcome-screen {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      /* 模擬東京手繪風背景：結合柔和漸層與日式插畫氛圍 */
-      background: linear-gradient(135deg, rgba(255, 235, 238, 0.8), rgba(227, 242, 253, 0.8)),
-                  url('bg-tokyo.png') no-repeat center center;
-      background-size: cover;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 20px;
-      transition: opacity 0.5s ease;
+      padding: 32px 24px;
+      padding-top: max(32px, env(safe-area-inset-top));
+      padding-bottom: max(32px, env(safe-area-inset-bottom));
+      z-index: 50;
+      background: linear-gradient(180deg, #F9F8F5 0%, #EDE9E1 100%);
     }
 
-    /* 標題與副標題樣式 */
+    .zine-frame {
+      border: 1px solid var(--charcoal);
+      padding: 36px 24px;
+      max-width: 320px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.75);
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    .zine-frame::before {
+      content: "TOKYO NOTE / 2026";
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-washi);
+      padding: 0 10px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--sub-gray);
+      font-family: var(--font-serif);
+    }
+
+    .hero-vertical-meta {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--accent-cinnabar);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
     .hero-title {
-      font-size: 32px;
-      font-weight: 700;
-      color: #2c3e50;
-      margin-bottom: 10px;
-      text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
+      font-family: var(--font-serif);
+      font-size: 27px;
+      font-weight: 500;
+      color: var(--charcoal);
+      letter-spacing: 2.5px;
+      margin-bottom: 8px;
     }
 
     .hero-subtitle {
-      font-size: 16px;
-      color: #7f8c8d;
-      margin-bottom: 40px;
-      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+      font-size: 13.5px;
+      color: var(--sub-gray);
+      letter-spacing: 1.5px;
+      margin-bottom: 24px;
+      line-height: 1.6;
     }
 
-    /* 「開始導覽」按鈕設計 */
+    .hero-divider {
+      width: 28px;
+      height: 1px;
+      background-color: var(--line-dark);
+      margin: 0 auto 24px auto;
+    }
+
+    .hero-quote {
+      font-size: 12px;
+      line-height: 1.8;
+      color: var(--sub-gray);
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+
+    /* 「開始導覽」按鈕：沉著文青按鈕 */
     .start-btn {
-      background: #ff5252;
-      color: white;
-      font-size: 18px;
-      font-weight: 600;
-      padding: 16px 40px;
-      border: none;
-      border-radius: 50px;
+      display: inline-block;
+      width: 100%;
+      background: var(--charcoal);
+      color: #FBF9F5;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 2.5px;
+      padding: 14px 20px;
+      border: 1px solid var(--charcoal);
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(255, 82, 82, 0.4);
-      transition: transform 0.2s, background-color 0.2s;
       text-decoration: none;
+      transition: all 0.25s ease;
+      font-family: var(--font-serif);
     }
 
     .start-btn:active {
-      transform: scale(0.95);
-      background-color: #ff1744;
+      background: #44403C;
+      transform: scale(0.99);
     }
 
-    /* 進入導覽後的「主選單頁面」（預設隱藏） */
+    /* ================= 2. 導覽主畫面 (Main App) ================= */
     .main-app {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: #f8f9fa;
+      background: var(--bg-washi);
       display: none;
       flex-direction: column;
-      animation: fadeIn 0.5s ease;
+      opacity: 0;
     }
 
     .app-header {
-      background: #ff5252;
-      color: white;
-      padding: 16px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: 600;
-      padding-top: max(16px, env(safe-area-inset-top));
+      background: #FAF8F5;
+      border-bottom: 1px solid var(--line-color);
+      padding: 14px 20px;
+      padding-top: max(14px, env(safe-area-inset-top));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 20;
+    }
+
+    .app-title {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      letter-spacing: 1.8px;
+      color: var(--charcoal);
+      font-weight: 500;
+    }
+
+    .header-sub-btn {
+      background: none;
+      border: none;
+      font-size: 11px;
+      color: var(--sub-gray);
+      letter-spacing: 1px;
+      cursor: pointer;
+      font-family: var(--font-hand);
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .app-content {
       flex: 1;
-      padding: 20px;
+      padding: 20px 18px;
+      padding-bottom: max(30px, env(safe-area-inset-bottom));
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .page-lead {
+      margin-bottom: 20px;
+      padding: 0 4px;
+    }
+
+    .page-lead-en {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--accent-cinnabar);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .page-lead-cn {
+      font-size: 12.5px;
+      color: var(--sub-gray);
+      line-height: 1.6;
+    }
+
+    /* ================= 3. 原始四分類卡片樣式 ================= */
+    .category-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      background: var(--card-bg);
+      border: 1px solid var(--line-color);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+      transition: all 0.25s ease;
+      cursor: pointer;
+      overflow: hidden;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .card:active {
+      background-color: #FCFBF9;
+    }
+
+    .card-summary {
+      padding: 18px 18px 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-text {
+      flex: 1;
+      padding-right: 12px;
+    }
+
+    .card-num {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: var(--accent-cinnabar);
+      font-family: var(--font-serif);
+      margin-bottom: 3px;
+    }
+
+    .card h3 {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--charcoal);
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+
+    .card p {
+      font-size: 12.5px;
+      color: var(--sub-gray);
+      line-height: 1.5;
+    }
+
+    .expand-indicator {
+      font-size: 11px;
+      color: var(--sub-gray);
+      border: 1px solid var(--line-color);
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+      font-family: var(--font-serif);
+      flex-shrink: 0;
+    }
+
+    .card.open .expand-indicator {
+      transform: rotate(45deg);
+    }
+
+    /* 展開收合內容區域 */
+    .card-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+      background: #FAF8F5;
+      border-top: 1px dashed var(--line-color);
+    }
+
+    .card.open .card-details {
+      max-height: 600px;
+    }
+
+    .details-inner {
+      padding: 16px 18px 20px 18px;
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: var(--charcoal);
+    }
+
+    /* 文青手寫註記與列表 */
+    .note-row {
+      margin-bottom: 12px;
+      padding-left: 10px;
+      border-left: 2px solid var(--accent-cinnabar);
+    }
+
+    .note-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--charcoal);
+      margin-bottom: 2px;
+      font-family: var(--font-serif);
+    }
+
+    .note-desc {
+      color: var(--sub-gray);
+    }
+
+    /* 事前準備勾選手記 */
+    .check-list-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(226, 221, 213, 0.4);
+    }
+
+    .check-box {
+      width: 17px;
+      height: 17px;
+      border: 1px solid var(--line-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .check-row.done .check-box {
+      background: var(--charcoal);
+      color: #FFF;
+      border-color: var(--charcoal);
+    }
+
+    .check-row.done span.text {
+      text-decoration: line-through;
+      color: #A8A29E;
+    }
+
+    /* 手寫心得隨筆區 */
+    .memo-textarea {
+      width: 100%;
+      border: 1px solid var(--line-color);
+      background: #FFF;
+      padding: 10px 12px;
+      font-family: var(--font-hand);
+      font-size: 12px;
+      color: var(--charcoal);
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      margin-top: 8px;
+    }
+
+    .memo-textarea:focus {
+      border-color: var(--charcoal);
     }
   </style>
 </head>
-<body>
+<body class="washi-pattern">
 
-  <!-- 1. 初始歡迎畫面（手繪風格背景 + 置中按鈕） -->
+  <!-- 1. 初始歡迎畫面（文青純粹手寫風） -->
   <div class="welcome-screen" id="welcomeScreen">
-    <h1 class="hero-title">🇯🇵 東京旅遊導覽</h1>
-    <p class="hero-subtitle">探索日本冒險之旅</p>
-    <button class="start-btn" onclick="startTour()">開始導覽</button>
+    <div class="zine-frame">
+      <div class="hero-vertical-meta">TOKYO散策</div>
+      <h1 class="hero-title cta-title">東京旅遊導覽</h1>
+      <p class="hero-subtitle cta-text">探索日本漫步之旅</p>
+      
+      <div class="hero-divider"></div>
+      
+      <div class="hero-quote">
+        「慢下腳步，把日常寫成風景。<br>
+        轉角的喫茶店、微涼的下町參道。」
+      </div>
+
+      <button class="start-btn cta-button" onclick="startTour()">開始導覽</button>
+    </div>
   </div>
 
-  <!-- 2. 導覽主畫面（點擊按鈕後顯示） -->
+  <!-- 2. 導覽主畫面（維持原始四個分類，點擊展開詳情） -->
   <div class="main-app" id="mainApp">
+    
     <header class="app-header">
-      東京景點推薦
+      <h2 class="app-title">東京走走！出發</h2>
+      <button class="header-sub-btn" onclick="backToWelcome()">
+        <span>↩ 返回首頁</span>
+      </button>
     </header>
+
     <main class="app-content">
-      <div class="card">
-        <h3>淺草寺與雷門</h3>
-        <p>體驗傳統江戶風情，品嚐人形燒與拍下巨大紅燈籠。</p>
+      
+      <div class="page-lead">
+        <div class="page-lead-en">Travel Notes</div>
+        <p class="page-lead-cn">點擊卡片查閱筆記細節與隨行備忘。</p>
       </div>
-      <div class="card">
-        <h3>澀谷 Scramble 交叉口</h3>
-        <p>感受全世界最繁忙十字路口的震撼魅力。</p>
+
+      <div class="category-stack">
+        
+        <!-- 卡片 1：航班資訊 -->
+        <div class="card" onclick="toggleCard(this)">
+          <div class="card-summary">
+            <div class="card-text">
+              <div class="card-num">01 / FLIGHT & ACCESS</div>
+              <h3>航班資訊</h3>
+              <p>找出舒適交通。</p>
+            </div>
+            <div class="expand-indicator">＋</div>
+          </div>
+          <div class="card-details">
+            <div class="details-inner">
+              <div class="note-row">
+                <div class="note-title">成田機場 (NRT) 交通選擇</div>
+                <div class="note-desc">
+                  • <b>Skyliner</b>：36 分鐘直達上野・日暮里，適合住東側旅客。<br>
+                  • <b>N'EX 成田特快</b>：約 60 分鐘直達東京、新宿、澀谷，全車指定席，推薦持 JR PASS 或住新宿一帶。
+                </div>
+              </div>
+              <div class="note-row">
+                <div class="note-title">羽田機場 (HND) 市區直達</div>
+                <div class="note-desc">
+                  • <b>東京單軌電車</b>：約 13 分鐘抵達濱松町，轉乘山手線極度便利。<br>
+                  • <b>京急線</b>：直通都營淺草線，直達新橋、東銀座、淺草無需轉乘。
+                </div>
+              </div>
+              <div class="note-row" style="border-left-color: #8C827A; margin-bottom: 0;">
+                <div class="note-title">隨身手寫筆記</div>
+                <div class="note-desc">起飛前 3 小時抵達機場。下機後先在自動販賣機買罐溫焙茶，順口解渴。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片 2：事前準備事項 -->
+        <div class="card" onclick="toggleCard(this)">
+          <div class="card-summary">
+            <div class="card-text">
+              <div class="card-num">02 / CHECKLIST</div>
+              <h3>事前準備事項</h3>
+              <p>預先準備，不慌不忙。</p>
+            </div>
+            <div class="expand-indicator">＋</div>
+          </div>
+          <div class="card-details">
+            <div class="details-inner">
+              <div style="font-size: 11px; color: var(--sub-gray); margin-bottom: 8px;">
+                點選標記完成進度（已自動儲存）：
+              </div>
+              
+              <div class="check-list-group" id="prepChecklist">
+                <div class="check-row" onclick="toggleCheckItem(event, 0)">
+                  <div class="check-box" id="chk-0">✓</div>
+                  <span class="text">護照有效期限（確認 6 個月以上效期）</span>
+                </div>
+                <div class="check-row" onclick="toggleCheckItem(event, 1)">
+                  <div class="check-box" id="chk-1">✓</div>
+                  <span class="text">填寫 Visit Japan Web 取得通關入境 QR Code</span>
+                </div>
+                <div class="check-row" onclick="toggleCheckItem(event, 2)">
+                  <div class="check-box" id="chk-2"></div>
+                  <span class="text">Apple 錢包綁定 Suica / Pasmo 西瓜卡</span>
+                </div>
+                <div class="check-row" onclick="toggleCheckItem(event, 3)">
+                  <div class="check-box" id="chk-3"></div>
+                  <span class="text">開通日韓漫遊或安裝好 eSIM</span>
+                </div>
+                <div class="check-row" onclick="toggleCheckItem(event, 4)">
+                  <div class="check-box" id="chk-4"></div>
+                  <span class="text">準備少量日圓現鈔零錢（特色小店專用）</span>
+                </div>
+                <div class="check-row" onclick="toggleCheckItem(event, 5)">
+                  <div class="check-box" id="chk-5"></div>
+                  <span class="text">舒適耐走的散步鞋與隨身保溫瓶</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片 3：景點遊覽 -->
+        <div class="card" onclick="toggleCard(this)">
+          <div class="card-summary">
+            <div class="card-text">
+              <div class="card-num">03 / PLACES & STROLL</div>
+              <h3>景點遊覽</h3>
+              <p>感受日本東西魅力。</p>
+            </div>
+            <div class="expand-indicator">＋</div>
+          </div>
+          <div class="card-details">
+            <div class="details-inner">
+              <div class="note-row">
+                <div class="note-title">谷根千・老町巷弄慢步</div>
+                <div class="note-desc">
+                  谷中、根津、千駄木一帶保留了古樸下町韻味。推薦傍晚在「夕陽階梯」看晚霞，尋找隱密木造老屋雜貨店。
+                </div>
+              </div>
+              <div class="note-row">
+                <div class="note-title">藏前・職人與手作選物</div>
+                <div class="note-desc">
+                  被譽為東京布魯克林，沿著隅田川林立獨立文具店（如 Kakimori 客製筆記本）、自家烘焙咖啡香氣瀰漫。
+                </div>
+              </div>
+              <div class="note-row">
+                <div class="note-title">代官山・蔦屋書店與綠林</div>
+                <div class="note-desc">
+                  森林中的圖書館「T-SITE」，翻翻建築與藝術書籍，在常春藤圍繞的露天座椅享受一段靜謐安閒時光。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片 4：食指大動 -->
+        <div class="card" onclick="toggleCard(this)">
+          <div class="card-summary">
+            <div class="card-text">
+              <div class="card-num">04 / TASTE & COFFEE</div>
+              <h3>食指大動</h3>
+              <p>美食當前、盡情享用。</p>
+            </div>
+            <div class="expand-indicator">＋</div>
+          </div>
+          <div class="card-details">
+            <div class="details-inner">
+              <div class="note-row">
+                <div class="note-title">昭和喫茶店・維也納咖啡與布丁</div>
+                <div class="note-desc">
+                  如神保町「Ladrio」或銀座老鋪，點一杯覆上厚鮮奶油的維也納黑咖啡，佐手工微苦焦糖布丁。
+                </div>
+              </div>
+              <div class="note-row">
+                <div class="note-title">神田・老鋪手打蕎麥麵</div>
+                <div class="note-desc">
+                  百年老店的蒸籠蕎麥（Seiro），輕沾柴魚香濃口醬汁，最後以溫熱的蕎麥湯收尾，暖胃且舒心。
+                </div>
+              </div>
+              
+              <div style="margin-top: 14px;">
+                <div style="font-size: 11.5px; font-weight: 600; color: var(--charcoal); margin-bottom: 2px;">
+                  ✎ 隨手記下想吃的店：
+                </div>
+                <textarea 
+                  class="memo-textarea" 
+                  rows="3" 
+                  id="foodMemo" 
+                  placeholder="寫下朋友推薦的居酒屋、咖啡店名..."
+                  oninput="saveFoodMemo()"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <div class="card">
-        <h3>新宿御苑</h3>
-        <p>在都市叢林中享受片刻的寧靜與四季自然美景。</p>
-      </div>
+
     </main>
   </div>
 
-  <!-- 互動切換與 Service Worker 註冊 -->
   <script>
+    // 1. 歡迎頁面進場動畫
+    document.addEventListener("DOMContentLoaded", () => {
+      const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+      tl.from(".zine-frame", {
+        opacity: 0,
+        y: 15,
+        duration: 0.8
+      })
+      .from(".cta-title", {
+        opacity: 0,
+        y: 10,
+        duration: 0.6
+      }, "-=0.4")
+      .from(".cta-text", {
+        opacity: 0,
+        y: 10,
+        duration: 0.6
+      }, "-=0.4")
+      .from(".hero-quote", {
+        opacity: 0,
+        duration: 0.6
+      }, "-=0.3")
+      .from(".cta-button", {
+        opacity: 0,
+        y: 10,
+        duration: 0.6
+      }, "-=0.3");
+
+      initChecklistStorage();
+      initFoodMemoStorage();
+    });
+
+    // 2. 切換至主導覽頁
     function startTour() {
-      // 隱藏歡迎畫面，顯示主選單
-      document.getElementById('welcomeScreen').style.opacity = '0';
-      setTimeout(() => {
-        document.getElementById('welcomeScreen').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'flex';
-      }, 500);
+      gsap.to("#welcomeScreen", {
+        opacity: 0,
+        duration: 0.35,
+        ease: "power2.inOut",
+        onComplete: () => {
+          document.getElementById('welcomeScreen').style.display = 'none';
+          const mainApp = document.getElementById('mainApp');
+          mainApp.style.display = 'flex';
+          gsap.to(mainApp, { opacity: 1, duration: 0.4 });
+        }
+      });
     }
 
-    // 註冊 PWA Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('SW 註冊成功', reg))
-          .catch(err => console.log('SW 註冊失敗', err));
+    // 返回歡迎頁
+    function backToWelcome() {
+      gsap.to("#mainApp", {
+        opacity: 0,
+        duration: 0.3,
+        onComplete: () => {
+          document.getElementById('mainApp').style.display = 'none';
+          const welcome = document.getElementById('welcomeScreen');
+          welcome.style.display = 'flex';
+          gsap.to(welcome, { opacity: 1, duration: 0.35 });
+        }
       });
+    }
+
+    // 3. 卡片展開與收合 (Accordion)
+    function toggleCard(cardElement) {
+      const isOpen = cardElement.classList.contains('open');
+      
+      // 平滑切換當前卡片
+      if (isOpen) {
+        cardElement.classList.remove('open');
+      } else {
+        cardElement.classList.add('open');
+      }
+    }
+
+    // 4. 事前準備 Checkbox 互動與儲存
+    const defaultChecks = [true, true, false, false, false, false];
+
+    function initChecklistStorage() {
+      const saved = localStorage.getItem('tokyo_prep_checks');
+      const state = saved ? JSON.parse(saved) : defaultChecks;
+      applyChecklistState(state);
+    }
+
+    function applyChecklistState(state) {
+      const rows = document.querySelectorAll('#prepChecklist .check-row');
+      rows.forEach((row, i) => {
+        const isDone = !!state[i];
+        if (isDone) {
+          row.classList.add('done');
+          row.querySelector('.check-box').textContent = '✓';
+        } else {
+          row.classList.remove('done');
+          row.querySelector('.check-box').textContent = '';
+        }
+      });
+    }
+
+    function toggleCheckItem(event, index) {
+      event.stopPropagation(); // 避免觸發卡片收合
+      const saved = localStorage.getItem('tokyo_prep_checks');
+      const state = saved ? JSON.parse(saved) : [...defaultChecks];
+      state[index] = !state[index];
+      localStorage.setItem('tokyo_prep_checks', JSON.stringify(state));
+      applyChecklistState(state);
+    }
+
+    // 5. 隨身手寫筆記儲存
+    function initFoodMemoStorage() {
+      const savedMemo = localStorage.getItem('tokyo_food_memo');
+      if (savedMemo) {
+        document.getElementById('foodMemo').value = savedMemo;
+      }
+    }
+
+    function saveFoodMemo() {
+      const val = document.getElementById('foodMemo').value;
+      localStorage.setItem('tokyo_food_memo', val);
     }
   </script>
 </body>
