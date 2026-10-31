@@ -1,6 +1,6 @@
 {
-  "name": "我的應用程式",
-  "short_name": "我的App",
+  "name": "東京旅遊導覽",
+  "short_name": "旅遊日記",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f3f4f6",
